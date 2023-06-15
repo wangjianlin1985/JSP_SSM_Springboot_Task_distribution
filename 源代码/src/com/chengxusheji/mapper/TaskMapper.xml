@@ -1,0 +1,49 @@
+﻿<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.TaskMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加任务记录 -->
+	<insert id="addTask" parameterType="task">
+		insert into t_task(workObj,title,taskContent,pubTime,taskState,endTime,takeUser,workRecord) values 
+		(#{workObj.activityId},#{title},#{taskContent},#{pubTime},#{taskState},#{endTime},#{takeUser},#{workRecord})
+	</insert>
+
+	<!-- 按照查询条件分页查询任务记录 -->
+	<select id="queryTask" resultMap="taskMap" >
+		select t_task.* from t_task,t_activityInfo ${where} and t_task.workObj = t_activityInfo.activityId limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="taskMap" type="task">
+        <id property="taskId" column="taskId" />
+        <association property="workObj" column="workObj" select="com.chengxusheji.mapper.ActivityInfoMapper.getActivityInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有任务记录 -->
+	<select id="queryTaskList" resultMap="taskMap" >
+		select t_task.* from t_task,t_activityInfo ${where} and t_task.workObj = t_activityInfo.activityId
+	</select>
+
+    <!-- 按照查询条件的任务记录数 -->
+	<select id="queryTaskCount" resultType="int">
+		select count(*) from t_task,t_activityInfo ${where} and t_task.workObj = t_activityInfo.activityId
+	</select>
+
+	<!-- 根据主键查询某个任务记录 -->
+	<select id="getTask" parameterType="int" resultMap="taskMap">
+		select * from t_task where t_task.taskId = #{taskId}
+	</select>
+
+	<!-- 更新任务记录 -->
+	<update id="updateTask" parameterType="task">
+		update t_task set workObj=#{workObj.activityId},title=#{title},taskContent=#{taskContent},pubTime=#{pubTime},taskState=#{taskState},endTime=#{endTime},takeUser=#{takeUser},workRecord=#{workRecord} where taskId = #{taskId}
+	</update>
+
+	<!-- 删除任务记录 -->
+	<delete id="deleteTask" parameterType="int">
+		delete from t_task where taskId=#{taskId}
+	</delete>
+
+</mapper>
